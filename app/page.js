@@ -6,10 +6,21 @@ import {
   Stack,
   Typography,
   Button,
-  Modal,
-  TextField,
+  Paper,
+  IconButton,
+  InputBase,
+  Card,
+  CardContent,
+  CardMedia,
+  CardActions,
+  CardHeader,
 } from "@mui/material";
-import { firestore } from "@/firebase";
+import {
+  Add as AddIcon,
+  Remove as RemoveIcon,
+  Delete as DeleteIcon,
+} from "@mui/icons-material";
+import { firestore, storage } from "@/firebase";
 import {
   collection,
   doc,
@@ -19,27 +30,13 @@ import {
   deleteDoc,
   getDoc,
 } from "firebase/firestore";
-
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "white",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-  display: "flex",
-  flexDirection: "column",
-  gap: 3,
-};
+import { ref, deleteObject } from "firebase/storage";
+import Sidebar from "@/components/Sidebar";
+import SearchIcon from "@mui/icons-material/Search";
 
 export default function Home() {
   const [inventory, setInventory] = useState([]);
-  const [open, setOpen] = useState(false);
-  const [itemName, setItemName] = useState("");
-  const [itemQuantity, setItemQuantity] = useState(0);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const updateInventory = async () => {
     const snapshot = query(collection(firestore, "inventory"));
@@ -61,7 +58,11 @@ export default function Home() {
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       const { quantity } = docSnap.data();
-      await setDoc(docRef, { quantity: quantity + quantityToAdd });
+      await setDoc(
+        docRef,
+        { quantity: quantity + quantityToAdd },
+        { merge: true }
+      );
     } else {
       await setDoc(docRef, { quantity: quantityToAdd });
     }
@@ -72,119 +73,120 @@ export default function Home() {
     const docRef = doc(collection(firestore, "inventory"), item);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      const { quantity } = docSnap.data();
+      const { quantity, image } = docSnap.data();
       if (quantity === 1) {
+        if (image) {
+          const imageRef = ref(storage, image);
+          try {
+            await deleteObject(imageRef);
+            console.log(`Image deleted: ${image}`);
+          } catch (error) {
+            console.error(`Error deleting image: ${error}`);
+          }
+        }
         await deleteDoc(docRef);
       } else {
-        await setDoc(docRef, { quantity: quantity - 1 });
+        await setDoc(docRef, { quantity: quantity - 1 }, { merge: true });
       }
     }
     await updateInventory();
   };
 
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+  const deleteItem = async (item) => {
+    const docRef = doc(collection(firestore, "inventory"), item);
+    const docSnap = await getDoc(docRef);
+    if (docSnap.exists()) {
+      const { image } = docSnap.data();
+      if (image) {
+        const imageRef = ref(storage, image);
+        try {
+          await deleteObject(imageRef);
+          console.log(`Image deleted: ${image}`);
+        } catch (error) {
+          console.error(`Error deleting image: ${error}`);
+        }
+      }
+      await deleteDoc(docRef);
+    }
+    await updateInventory();
+  };
+
+  const filteredInventory = inventory.filter(({ name }) =>
+    name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
-    <Box
-      width="100vw"
-      height="100vh"
-      display={"flex"}
-      justifyContent={"center"}
-      flexDirection={"column"}
-      alignItems={"center"}
-      gap={2}
-    >
-      <Modal
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Add Item
-          </Typography>
-          <Stack width="100%" direction={"row"} spacing={2}>
-            <TextField
-              id="outlined-basic"
-              label="Item"
-              variant="outlined"
-              fullWidth
-              value={itemName}
-              required
-              onChange={(e) => setItemName(e.target.value)}
+    <div className="flex">
+      <Sidebar />
+      <div className="flex flex-col gap-10">
+        <div className="p-10 h-2 font-bold text-3xl flex justify-between w-full">
+          <p>Pantry</p>
+          <Paper
+            component="form"
+            sx={{
+              p: "20px 20px",
+              display: "flex",
+              alignItems: "center",
+              width: 400,
+            }}
+          >
+            <InputBase
+              sx={{ ml: 1, flex: 1 }}
+              placeholder="Search Items"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              inputProps={{ "aria-label": "search inventory items" }}
             />
-            <TextField
-              id="filled-number"
-              label="Quantity"
-              type="number"
-              InputLabelProps={{
-                shrink: true,
-              }}
-              required
-              value={itemQuantity}
-              onChange={(e) => setItemQuantity(Number(e.target.value))}
-            />
-            <Button
-              variant="outlined"
-              onClick={() => {
-                addItem(itemName, itemQuantity);
-                setItemName("");
-                setItemQuantity(0);
-                handleClose();
-              }}
-            >
-              Add
-            </Button>
-          </Stack>
-        </Box>
-      </Modal>
-      <Button variant="contained" onClick={handleOpen}>
-        Add New Item
-      </Button>
-      <Box border={"1px solid #333"}>
+            <IconButton type="button" sx={{ p: "10px" }} aria-label="search">
+              <SearchIcon />
+            </IconButton>
+          </Paper>
+        </div>
         <Box
-          width="800px"
-          height="100px"
-          bgcolor={"#ADD8E6"}
-          display={"flex"}
-          justifyContent={"center"}
-          alignItems={"center"}
+          width="75vw"
+          display="flex"
+          flexWrap="wrap"
+          justifyContent="center"
+          gap={10}
         >
-          <Typography variant={"h2"} color={"#333"} textAlign={"center"}>
-            Inventory Items
-          </Typography>
-        </Box>
-        <Stack width="800px" height="300px" spacing={2} overflow={"auto"}>
-          {inventory.map(({ name, quantity }) => (
-            <Box
-              key={name}
-              width="100%"
-              minHeight="150px"
-              display={"flex"}
-              justifyContent={"space-between"}
-              alignItems={"center"}
-              bgcolor={"#f0f0f0"}
-              paddingX={5}
-            >
-              <Typography variant={"h3"} color={"#333"} textAlign={"center"}>
-                {name.charAt(0).toUpperCase() + name.slice(1)}
-              </Typography>
-              <Typography variant={"h3"} color={"#333"} textAlign={"center"}>
-                Quantity: {quantity}
-              </Typography>
-              <Stack direction={"row"} spacing={2}>
-                <Button variant="contained" onClick={() => addItem(name, 1)}>
-                  Add
-                </Button>
-                <Button variant="contained" onClick={() => removeItem(name)}>
-                  Remove
-                </Button>
-              </Stack>
-            </Box>
+          {filteredInventory.map(({ name, quantity, image }) => (
+            <Card key={name} className="w-[300px]">
+              {image && (
+                <CardMedia
+                  component="img"
+                  width={500}
+                  height="200"
+                  image={image}
+                  alt={name}
+                />
+              )}
+              <CardContent>
+                <Typography gutterBottom variant="h5" component="div">
+                  {name.charAt(0).toUpperCase() + name.slice(1)}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Quantity: {quantity}
+                </Typography>
+              </CardContent>
+              <CardActions>
+                <IconButton size="small" onClick={() => addItem(name, 1)}>
+                  <AddIcon />
+                </IconButton>
+                <IconButton size="small" onClick={() => removeItem(name)}>
+                  {quantity === 1 ? <DeleteIcon /> : <RemoveIcon />}
+                </IconButton>
+                <IconButton
+                  className="float-end"
+                  size="small"
+                  onClick={() => deleteItem(name)}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </CardActions>
+            </Card>
           ))}
-        </Stack>
-      </Box>
-    </Box>
+        </Box>
+      </div>
+    </div>
   );
 }
