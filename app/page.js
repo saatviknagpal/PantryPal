@@ -13,7 +13,6 @@ import {
   CardContent,
   CardMedia,
   CardActions,
-  CardHeader,
 } from "@mui/material";
 import {
   Add as AddIcon,
@@ -73,17 +72,8 @@ export default function Home() {
     const docRef = doc(collection(firestore, "inventory"), item);
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
-      const { quantity, image } = docSnap.data();
+      const { quantity } = docSnap.data();
       if (quantity === 1) {
-        if (image) {
-          const imageRef = ref(storage, image);
-          try {
-            await deleteObject(imageRef);
-            console.log(`Image deleted: ${image}`);
-          } catch (error) {
-            console.error(`Error deleting image: ${error}`);
-          }
-        }
         await deleteDoc(docRef);
       } else {
         await setDoc(docRef, { quantity: quantity - 1 }, { merge: true });
@@ -97,7 +87,7 @@ export default function Home() {
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       const { image } = docSnap.data();
-      if (image) {
+      if (image && image.includes("https://firebasestorage.googleapis.com")) {
         const imageRef = ref(storage, image);
         try {
           await deleteObject(imageRef);
@@ -117,9 +107,8 @@ export default function Home() {
 
   return (
     <div className="flex">
-      <Sidebar />
-      <div className="flex flex-col gap-10">
-        <div className="p-10 h-2 font-bold text-3xl flex justify-between w-full">
+      <div className="flex flex-col gap-10 p-10 justify-center items-center w-full">
+        <div className="pb-10 h-2 font-bold text-3xl flex justify-between w-full">
           <p>Pantry</p>
           <Paper
             component="form"
@@ -143,21 +132,19 @@ export default function Home() {
           </Paper>
         </div>
         <Box
-          width="75vw"
+          className="md:w-[75vw] w-full justify-center items-center"
           display="flex"
           flexWrap="wrap"
-          justifyContent="center"
           gap={10}
         >
           {filteredInventory.map(({ name, quantity, image }) => (
-            <Card key={name} className="w-[300px]">
+            <Card key={name} className="md:w-[300px]">
               {image && (
                 <CardMedia
                   component="img"
-                  width={500}
-                  height="200"
                   image={image}
                   alt={name}
+                  sx={{ width: 300, height: 300, objectFit: "cover" }}
                 />
               )}
               <CardContent>
@@ -175,13 +162,15 @@ export default function Home() {
                 <IconButton size="small" onClick={() => removeItem(name)}>
                   {quantity === 1 ? <DeleteIcon /> : <RemoveIcon />}
                 </IconButton>
-                <IconButton
-                  className="float-end"
-                  size="small"
-                  onClick={() => deleteItem(name)}
-                >
-                  <DeleteIcon />
-                </IconButton>
+                {quantity > 1 && (
+                  <IconButton
+                    className="float-end"
+                    size="small"
+                    onClick={() => deleteItem(name)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                )}
               </CardActions>
             </Card>
           ))}

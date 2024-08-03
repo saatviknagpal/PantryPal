@@ -11,7 +11,7 @@ export const navLinks = [
   },
   {
     label: "Recipes",
-    route: "/transformations/add/fill",
+    route: "/recipes",
     icon: "/assets/icons/stars.svg",
   },
 ];

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import {
   Box,
@@ -10,6 +10,10 @@ import {
   TextField,
   CircularProgress,
   IconButton,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
 } from "@mui/material";
 import { firestore, storage } from "@/firebase";
 import { collection, doc, setDoc } from "firebase/firestore";
@@ -17,48 +21,50 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import Sidebar from "@/components/Sidebar";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import CameraAltIcon from "@mui/icons-material/CameraAlt";
+import { Camera } from "react-camera-pro";
 
-const style = {
-  position: "absolute",
-  top: "50%",
-  left: "50%",
-  transform: "translate(-50%, -50%)",
-  width: 400,
-  bgcolor: "white",
-  border: "2px solid #000",
-  boxShadow: 24,
-  p: 4,
-  display: "flex",
-  flexDirection: "column",
-  gap: 3,
+const generateImageWithPollinations = async (itemName) => {
+  const encodedItemName = encodeURIComponent(itemName);
+  const imageUrl = `https://image.pollinations.ai/prompt/${encodedItemName}`;
+  return imageUrl;
 };
 
 export default function AddItem() {
   const router = useRouter();
   const [itemName, setItemName] = useState("");
-  const [itemQuantity, setItemQuantity] = useState();
+  const [itemQuantity, setItemQuantity] = useState("");
   const [itemImage, setItemImage] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [imageUrl, setImageUrl] = useState("");
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const cameraRef = useRef(null);
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (file) {
       setItemImage(file);
+      setImageUrl("");
     }
   };
 
   const removeImage = () => {
     setItemImage(null);
+    setImageUrl("");
   };
 
-  const generateImageWithGeminiAI = async (name) => {
+  const generateImage = async (itemName) => {
     setLoading(true);
-    const imageUrl = await new Promise((resolve) => {
-      setTimeout(() => {
-        resolve(`https://via.placeholder.com/150?text=${name}`);
-      }, 2000);
-    });
-    setItemImage(imageUrl);
+    try {
+      const generatedImageUrl = await generateImageWithPollinations(itemName);
+      setImageUrl(generatedImageUrl);
+    } catch (error) {
+      console.error("Error generating image:", error);
+      setLoading(false);
+    }
+  };
+
+  const handleImageLoad = () => {
     setLoading(false);
   };
 
@@ -70,25 +76,47 @@ export default function AddItem() {
   };
 
   const addItem = async () => {
-    if (!itemName || !itemQuantity || !itemImage) {
-      alert("Please fill in all fields and upload an image.");
+    if (!itemName || !itemQuantity || (!itemImage && !imageUrl)) {
+      alert("Please fill in all fields and upload or generate an image.");
       return;
     }
 
-    let imageUrl = itemImage;
+    let finalImageUrl = imageUrl;
 
-    if (itemImage instanceof File) {
-      imageUrl = await uploadImageToFirestore(itemImage);
+    if (itemImage) {
+      finalImageUrl = await uploadImageToFirestore(itemImage);
     }
 
     const docRef = doc(collection(firestore, "inventory"), itemName);
-    await setDoc(docRef, { quantity: Number(itemQuantity), image: imageUrl });
+    await setDoc(docRef, {
+      quantity: Number(itemQuantity),
+      image: finalImageUrl,
+    });
     router.push("/");
   };
 
+  const handleTakePhoto = () => {
+    const imageSrc = cameraRef.current.takePhoto();
+    const file = dataURLtoFile(imageSrc, "camera_image.png");
+    setItemImage(file);
+    setImageUrl("");
+    setCameraOpen(false);
+  };
+
+  const dataURLtoFile = (dataurl, filename) => {
+    const arr = dataurl.split(",");
+    const mime = arr[0].match(/:(.*?);/)[1];
+    const bstr = atob(arr[1]);
+    let n = bstr.length;
+    const u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new File([u8arr], filename, { type: mime });
+  };
+
   return (
-    <div className="flex">
-      <Sidebar />
+    <div className="flex h-screen">
       <Box
         width="75vw"
         display={"flex"}
@@ -102,24 +130,27 @@ export default function AddItem() {
           Add New Item
         </Typography>
         <Stack width="100%" spacing={2}>
-          {itemImage ? (
+          {loading && <CircularProgress />}
+          {itemImage || imageUrl ? (
             <Box
               display="flex"
               flexDirection="column"
               alignItems="center"
               gap={2}
             >
-              {typeof itemImage === "string" ? (
+              {imageUrl ? (
                 <img
-                  src={itemImage}
+                  src={imageUrl}
                   alt="Generated Item"
                   style={{ maxHeight: "200px" }}
+                  onLoad={handleImageLoad}
                 />
               ) : (
                 <img
                   src={URL.createObjectURL(itemImage)}
                   alt="Item Preview"
                   style={{ maxHeight: "200px" }}
+                  onLoad={handleImageLoad}
                 />
               )}
               <Button
@@ -141,15 +172,25 @@ export default function AddItem() {
               </IconButton>
             </Box>
           ) : (
-            <Button variant="contained" component="label" color="primary">
-              Upload Image
-              <input
-                type="file"
-                hidden
-                accept="image/*"
-                onChange={handleImageUpload}
-              />
-            </Button>
+            <Box display="flex" gap={2}>
+              <Button variant="contained" component="label" color="primary">
+                Upload Image
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                />
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                startIcon={<CameraAltIcon />}
+                onClick={() => setCameraOpen(true)}
+              >
+                Take Photo
+              </Button>
+            </Box>
           )}
           <TextField
             id="item-name"
@@ -163,13 +204,13 @@ export default function AddItem() {
           <Button
             variant="contained"
             color="secondary"
-            onClick={() => generateImageWithGeminiAI(itemName)}
+            onClick={() => generateImage(itemName)}
             disabled={loading}
           >
             {loading ? (
               <CircularProgress size={24} />
             ) : (
-              "Generate Image with Gemini AI"
+              "Generate Image with AI"
             )}
           </Button>
           <TextField
@@ -187,6 +228,20 @@ export default function AddItem() {
           </Button>
         </Stack>
       </Box>
+      <Dialog open={cameraOpen} onClose={() => setCameraOpen(false)}>
+        <DialogTitle>Take Photo</DialogTitle>
+        <DialogContent className="w-[500px]">
+          <Camera ref={cameraRef} aspectRatio={16 / 9} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCameraOpen(false)} color="primary">
+            Cancel
+          </Button>
+          <Button onClick={handleTakePhoto} color="primary">
+            Take Photo
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 }
