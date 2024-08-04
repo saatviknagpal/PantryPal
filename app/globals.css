@@ -57,3 +57,15 @@
   background: linear-gradient(90deg, #624cf5, #a74cf5);
   color: white;
 }
+
+.cl-userButtonBox {
+  display: flex;
+  flex-flow: row-reverse;
+  gap: 12px;
+}
+
+.cl-userButtonOuterIdentifier {
+  font-size: 16px;
+  font-weight: 600;
+  color: #384262;
+}

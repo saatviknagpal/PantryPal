@@ -1,7 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Box, Stack, Typography, Button, TextField } from "@mui/material";
+import {
+  Box,
+  Stack,
+  Typography,
+  Button,
+  TextField,
+  Card,
+  CardContent,
+  CardHeader,
+  CircularProgress,
+} from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
 import Sidebar from "@/components/Sidebar";
 import { firestore } from "@/firebase";
@@ -38,7 +48,7 @@ export default function Recipes() {
         body: JSON.stringify({ ingredients: selectedIngredients }),
       });
       const data = await response.json();
-      setRecipe(data.recipe);
+      setRecipe(formatRecipe(data.recipe));
     } catch (error) {
       console.error("Error generating recipe:", error);
     } finally {
@@ -46,17 +56,34 @@ export default function Recipes() {
     }
   };
 
+  const formatRecipe = (recipeText) => {
+    const formattedText = recipeText.split("\n").map((line, index) => {
+      if (line.trim().startsWith("*") && line.trim().endsWith("*")) {
+        const content = line.trim().slice(1, -1); // Remove the enclosing stars
+        return (
+          <Typography key={index} component="div" variant="body1" gutterBottom>
+            <strong>{content}</strong>
+          </Typography>
+        );
+      }
+      return (
+        <Typography key={index} component="div" variant="body1" gutterBottom>
+          {line}
+        </Typography>
+      );
+    });
+    return formattedText;
+  };
+
   return (
-    <div className="flex h-screen">
-      <Sidebar />
+    <div className="flex w-full">
       <Box
-        width="75vw"
+        width={{ xs: "100vw", lg: "calc(100vw - 300px)" }}
         display={"flex"}
-        justifyContent={"center"}
         flexDirection={"column"}
         alignItems={"center"}
-        gap={2}
-        padding={4}
+        gap={4}
+        padding={8}
       >
         <Typography variant="h4" gutterBottom>
           Generate Recipe
@@ -85,14 +112,14 @@ export default function Recipes() {
             onClick={generateRecipe}
             disabled={loading}
           >
-            {loading ? "Generating..." : "Generate Recipe"}
+            {loading ? <CircularProgress size={24} /> : "Generate Recipe"}
           </Button>
         </Stack>
         {recipe && (
-          <Box mt={4} p={2} border="1px solid #ccc" borderRadius="4px">
-            <Typography variant="h6">Generated Recipe</Typography>
-            <Typography>{recipe}</Typography>
-          </Box>
+          <Card mt={4} p={2} border="1px solid #ccc" borderRadius="4px">
+            <CardHeader title="Generated Recipe" />
+            <CardContent>{recipe}</CardContent>
+          </Card>
         )}
       </Box>
     </div>

@@ -107,8 +107,8 @@ export default function Home() {
 
   return (
     <div className="flex">
-      <div className="flex flex-col gap-10 p-10 justify-center items-center w-full">
-        <div className="pb-10 h-2 font-bold text-3xl flex justify-between w-full">
+      <div className="flex flex-col gap-10 px-5 justify-center items-center w-full">
+        <div className="p-10 h-2 font-bold text-3xl flex justify-between w-full">
           <p>Pantry</p>
           <Paper
             component="form"
@@ -116,7 +116,7 @@ export default function Home() {
               p: "20px 20px",
               display: "flex",
               alignItems: "center",
-              width: 400,
+              width: 300,
             }}
           >
             <InputBase
@@ -135,7 +135,7 @@ export default function Home() {
           className="md:w-[75vw] w-full justify-center items-center"
           display="flex"
           flexWrap="wrap"
-          gap={10}
+          gap={8}
         >
           {filteredInventory.map(({ name, quantity, image }) => (
             <Card key={name} className="md:w-[300px]">

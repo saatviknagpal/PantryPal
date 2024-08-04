@@ -81,6 +81,11 @@ export default function AddItem() {
       return;
     }
 
+    if (Number(itemQuantity) <= 0) {
+      alert("Quantity must be greater than zero.");
+      return;
+    }
+
     let finalImageUrl = imageUrl;
 
     if (itemImage) {
@@ -116,20 +121,23 @@ export default function AddItem() {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex ">
       <Box
         width="75vw"
         display={"flex"}
-        justifyContent={"center"}
         flexDirection={"column"}
         alignItems={"center"}
-        gap={2}
-        padding={4}
+        gap={5}
+        padding={6}
       >
         <Typography variant="h4" gutterBottom>
           Add New Item
         </Typography>
-        <Stack width="100%" spacing={2}>
+        <Stack
+          width="100%"
+          className="flex justify-center items-center"
+          spacing={2}
+        >
           {loading && <CircularProgress />}
           {itemImage || imageUrl ? (
             <Box
@@ -142,14 +150,14 @@ export default function AddItem() {
                 <img
                   src={imageUrl}
                   alt="Generated Item"
-                  style={{ maxHeight: "200px" }}
+                  style={{ maxHeight: "300px" }}
                   onLoad={handleImageLoad}
                 />
               ) : (
                 <img
                   src={URL.createObjectURL(itemImage)}
                   alt="Item Preview"
-                  style={{ maxHeight: "200px" }}
+                  style={{ maxHeight: "300px" }}
                   onLoad={handleImageLoad}
                 />
               )}
@@ -172,7 +180,11 @@ export default function AddItem() {
               </IconButton>
             </Box>
           ) : (
-            <Box display="flex" gap={2}>
+            <Box
+              display="flex"
+              gap={2}
+              className="flex justify-center items-center"
+            >
               <Button variant="contained" component="label" color="primary">
                 Upload Image
                 <input
@@ -201,18 +213,36 @@ export default function AddItem() {
             required
             onChange={(e) => setItemName(e.target.value)}
           />
-          <Button
-            variant="contained"
-            color="secondary"
-            onClick={() => generateImage(itemName)}
-            disabled={loading}
-          >
-            {loading ? (
-              <CircularProgress size={24} />
-            ) : (
-              "Generate Image with AI"
-            )}
-          </Button>
+          {itemName ? (
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => generateImage(itemName)}
+              disabled={loading}
+              className="w-full"
+            >
+              {loading ? (
+                <CircularProgress size={24} />
+              ) : (
+                "Generate Image with AI"
+              )}
+            </Button>
+          ) : (
+            <Button
+              variant="contained"
+              color="secondary"
+              onClick={() => generateImage(itemName)}
+              disabled={true}
+              className="w-full"
+            >
+              {loading ? (
+                <CircularProgress size={24} />
+              ) : (
+                "Generate Image with AI"
+              )}
+            </Button>
+          )}
+
           <TextField
             id="item-quantity"
             label="Quantity"
@@ -221,9 +251,21 @@ export default function AddItem() {
             fullWidth
             value={itemQuantity}
             required
-            onChange={(e) => setItemQuantity(Number(e.target.value))}
+            onChange={(e) => {
+              const value = Number(e.target.value);
+              if (value > 0) {
+                setItemQuantity(value);
+              } else {
+                setItemQuantity("");
+              }
+            }}
           />
-          <Button variant="contained" color="primary" onClick={addItem}>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={addItem}
+            className="w-full"
+          >
             Submit
           </Button>
         </Stack>
