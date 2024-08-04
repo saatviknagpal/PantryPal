@@ -2,6 +2,9 @@
 
 Pantry Pal is a web application that helps users manage their pantry inventory, generate recipes based on available ingredients, and visualize the recipes with images.
 
+# Demo
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/n3NJaAsTOzM/0.jpg)](https://www.youtube.com/watch?v=n3NJaAsTOzM)
+
 ## Installation
 1. Clone the repository.
 2. Install dependencies using `npm install`.
