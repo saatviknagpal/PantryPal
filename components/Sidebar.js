@@ -2,7 +2,12 @@
 
 import { useState } from "react";
 import { navLinks } from "@/constants"; // Ensure this import points to your constants file
-import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import {
+  SignedIn,
+  SignedOut,
+  UserButton,
+  RedirectToSignIn,
+} from "@clerk/nextjs";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -14,7 +19,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
-} from "@mui/material"; // Importing Button and other components from Material UI
+} from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
@@ -75,7 +80,7 @@ const Sidebar = () => {
                 <li
                   key={link.route}
                   className={`sidebar-nav_element group ${
-                    isActive ? "bg-purple-gradient text-white" : "text-gray-700"
+                    isActive ? " text-white" : "text-gray-700"
                   }`}
                 >
                   <Link className="sidebar-link" href={link.route}>
@@ -92,17 +97,13 @@ const Sidebar = () => {
               );
             })}
             <li className="flex-center cursor-pointer gap-2 p-4">
-              <UserButton afterSignOutUrl="/" showName />
+              <UserButton afterSignOutUrl="/sign-in" showName />
             </li>
           </ul>
         </SignedIn>
 
         <SignedOut>
-          <Button asChild className="button bg-purple-gradient bg-cover">
-            <Link href="https://helpful-werewolf-8.accounts.dev/sign-in">
-              Login
-            </Link>
-          </Button>
+          <RedirectToSignIn />
         </SignedOut>
       </nav>
     </div>
