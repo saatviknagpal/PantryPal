@@ -1,36 +1,35 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Pantry Pal App
 
-## Getting Started
+Pantry Pal is a web application that helps users manage their pantry inventory, generate recipes based on available ingredients, and visualize the recipes with images.
 
-First, run the development server:
+## Installation
+1. Clone the repository.
+2. Install dependencies using `npm install`.
+3. Set up environment variables using a `.env` file.
+4. Start the development server with `npm run dev`.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Features
+- **Inventory Management**: View and manage pantry items.
+- **Recipe Generation**: Generate recipes based on selected ingredients.
+- **Image Visualization**: Visualize recipes with images.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Technologies Used
+- Next.js for frontend development.
+- Firebase for database management.
+- Llama 3.1 API for recipe generation.
+- Pollinations AI for image creation.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+## File Structure
+- `app/page.js`: Contains the frontend code for managing pantry items and displaying inventory.
+- `app/recipes/page.js`: Includes the logic for fetching pantry items, generating recipes, and formatting recipe text.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Usage
+1. Add pantry items by searching and selecting from the inventory.
+2. Generate recipes by selecting ingredients and clicking the generate button.
+3. View the formatted recipe with highlighted key points.
 
-## Learn More
+## API Endpoints
+- `/api/generate-recipe`: POST endpoint to generate a recipe based on selected ingredients.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+## Additional Information
+For detailed documentation on API usage and environment variables, refer to the project's codebase and the respective API documentation.
