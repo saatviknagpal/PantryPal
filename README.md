@@ -11,7 +11,6 @@ Pantry Pal is a web application that helps users manage their pantry inventory, 
 ## Features
 - **Inventory Management**: View and manage pantry items.
 - **Recipe Generation**: Generate recipes based on selected ingredients.
-- **Image Visualization**: Visualize recipes with images.
 
 ## Technologies Used
 - Next.js for frontend development.
