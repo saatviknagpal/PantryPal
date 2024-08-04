@@ -13,7 +13,6 @@ import {
   CircularProgress,
 } from "@mui/material";
 import Autocomplete from "@mui/material/Autocomplete";
-import Sidebar from "@/components/Sidebar";
 import { firestore } from "@/firebase";
 import { collection, getDocs, query } from "firebase/firestore";
 
@@ -59,7 +58,7 @@ export default function Recipes() {
   const formatRecipe = (recipeText) => {
     const formattedText = recipeText.split("\n").map((line, index) => {
       if (line.trim().startsWith("*") && line.trim().endsWith("*")) {
-        const content = line.trim().slice(1, -1); // Remove the enclosing stars
+        const content = line.trim().slice(1, -1);
         return (
           <Typography key={index} component="div" variant="body1" gutterBottom>
             <strong>{content}</strong>
@@ -76,7 +75,7 @@ export default function Recipes() {
   };
 
   return (
-    <div className="flex w-full">
+    <div className="flex w-full dark:bg-gray-900 dark:text-white">
       <Box
         width={{ xs: "100vw", lg: "calc(100vw - 300px)" }}
         display={"flex"}
@@ -103,6 +102,28 @@ export default function Recipes() {
                 variant="outlined"
                 label="Select Ingredients"
                 placeholder="Ingredients"
+                sx={{
+                  "& .MuiOutlinedInput-root": {
+                    "& fieldset": {
+                      borderColor: "white",
+                    },
+                    "&:hover fieldset": {
+                      borderColor: "white",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "white",
+                    },
+                  },
+                  "& .MuiInputLabel-root": {
+                    color: "white",
+                  },
+                  "& .MuiInputBase-input": {
+                    color: "white",
+                  },
+                  "& .MuiButtonBase-root": {
+                    background: "white",
+                  },
+                }}
               />
             )}
           />
@@ -116,7 +137,17 @@ export default function Recipes() {
           </Button>
         </Stack>
         {recipe && (
-          <Card mt={4} p={2} border="1px solid #ccc" borderRadius="4px">
+          <Card
+            mt={4}
+            p={2}
+            sx={{
+              border: "1px solid #444",
+              borderRadius: "4px",
+              backgroundColor: "#333",
+              color: "#fff",
+              width: "100%",
+            }}
+          >
             <CardHeader title="Generated Recipe" />
             <CardContent>{recipe}</CardContent>
           </Card>

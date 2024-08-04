@@ -14,6 +14,7 @@ import {
   DialogActions,
   DialogContent,
   DialogTitle,
+  Tooltip,
 } from "@mui/material";
 import { firestore, storage } from "@/firebase";
 import { collection, doc, setDoc } from "firebase/firestore";
@@ -121,7 +122,7 @@ export default function AddItem() {
   };
 
   return (
-    <div className="flex ">
+    <div className="flex dark:bg-gray-900 dark:text-white">
       <Box
         width="75vw"
         display={"flex"}
@@ -212,6 +213,8 @@ export default function AddItem() {
             value={itemName}
             required
             onChange={(e) => setItemName(e.target.value)}
+            className="dark:bg-gray-700 dark:text-white"
+            InputLabelProps={{ className: "dark:text-white" }}
           />
           {itemName ? (
             <Button
@@ -228,19 +231,20 @@ export default function AddItem() {
               )}
             </Button>
           ) : (
-            <Button
-              variant="contained"
-              color="secondary"
-              onClick={() => generateImage(itemName)}
-              disabled={true}
-              className="w-full"
-            >
-              {loading ? (
-                <CircularProgress size={24} />
-              ) : (
-                "Generate Image with AI"
-              )}
-            </Button>
+            <Tooltip title="Write item name to generate image with AI">
+              <Button
+                variant="contained"
+                onClick={() => generateImage(itemName)}
+                disabled={true}
+                className="w-full dark:bg-gray-600 dark:text-white dark:disabled:bg-gray-800"
+              >
+                {loading ? (
+                  <CircularProgress size={24} />
+                ) : (
+                  "Generate Image with AI"
+                )}
+              </Button>
+            </Tooltip>
           )}
 
           <TextField
@@ -259,6 +263,8 @@ export default function AddItem() {
                 setItemQuantity("");
               }
             }}
+            className="dark:bg-gray-700 dark:text-white"
+            InputLabelProps={{ className: "dark:text-white" }}
           />
           <Button
             variant="contained"
@@ -271,11 +277,13 @@ export default function AddItem() {
         </Stack>
       </Box>
       <Dialog open={cameraOpen} onClose={() => setCameraOpen(false)}>
-        <DialogTitle>Take Photo</DialogTitle>
-        <DialogContent className="w-[500px]">
+        <DialogTitle className="dark:bg-gray-800 dark:text-white">
+          Take Photo
+        </DialogTitle>
+        <DialogContent className="w-[500px] dark:bg-gray-800 dark:text-white">
           <Camera ref={cameraRef} aspectRatio={16 / 9} />
         </DialogContent>
-        <DialogActions>
+        <DialogActions className="dark:bg-gray-800 dark:text-white">
           <Button onClick={() => setCameraOpen(false)} color="primary">
             Cancel
           </Button>

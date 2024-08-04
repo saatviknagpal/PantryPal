@@ -11,15 +11,7 @@ import {
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  Button,
-  IconButton,
-  Drawer,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
-} from "@mui/material";
+import { Button, IconButton, Drawer } from "@mui/material";
 import HomeIcon from "@mui/icons-material/Home";
 import RestaurantMenuIcon from "@mui/icons-material/RestaurantMenu";
 import AddCircleIcon from "@mui/icons-material/AddCircle";
@@ -34,7 +26,7 @@ const Sidebar = () => {
   };
 
   const drawer = (
-    <div className="flex size-full flex-col gap-4">
+    <div className="flex w-full h-full flex-col gap-4 dark:bg-gray-800">
       <Link href="/" className="sidebar-logo">
         <Image
           src="/assets/logo.webp"
@@ -51,7 +43,7 @@ const Sidebar = () => {
             {navLinks.slice(0, 3).map((link, index) => {
               const isActive = link.route === pathname;
               const icons = [
-                <HomeIcon key="home" />,
+                <HomeIcon key="pantry" />,
                 <AddCircleIcon key="add-item" />,
                 <RestaurantMenuIcon key="recipes" />,
               ];
@@ -60,7 +52,7 @@ const Sidebar = () => {
                 <li
                   key={link.route}
                   className={`sidebar-nav_element group ${
-                    isActive ? "bg-purple-gradient text-white" : "text-gray-700"
+                    isActive ? "bg-purple-700 text-white" : "text-gray-300"
                   }`}
                 >
                   <Link className="sidebar-link" href={link.route}>
@@ -80,7 +72,7 @@ const Sidebar = () => {
                 <li
                   key={link.route}
                   className={`sidebar-nav_element group ${
-                    isActive ? " text-white" : "text-gray-700"
+                    isActive ? "bg-purple-700 text-white" : "text-gray-300"
                   }`}
                 >
                   <Link className="sidebar-link" href={link.route}>
@@ -96,7 +88,7 @@ const Sidebar = () => {
                 </li>
               );
             })}
-            <li className="flex-center cursor-pointer gap-2 p-4">
+            <li className="flex-center cursor-pointer gap-2 p-4 text-white">
               <UserButton afterSignOutUrl="/sign-in" showName />
             </li>
           </ul>
@@ -117,10 +109,11 @@ const Sidebar = () => {
         edge="start"
         onClick={handleDrawerToggle}
         sx={{ display: { lg: "none" } }}
+        className="pl-5 w-max h-max dark:text-white"
       >
         <MenuIcon />
       </IconButton>
-      <aside className="hidden lg:flex sidebar h-screen w-72 bg-white p-5 shadow-md shadow-purple-200/50">
+      <aside className="hidden lg:flex sidebar h-screen w-72 bg-gray-800 p-5 shadow-md shadow-purple-200/50">
         {drawer}
       </aside>
       <Drawer

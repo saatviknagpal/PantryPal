@@ -30,7 +30,6 @@ import {
   getDoc,
 } from "firebase/firestore";
 import { ref, deleteObject } from "firebase/storage";
-import Sidebar from "@/components/Sidebar";
 import SearchIcon from "@mui/icons-material/Search";
 
 export default function Home() {
@@ -106,7 +105,7 @@ export default function Home() {
   );
 
   return (
-    <div className="flex">
+    <div className="flex dark:bg-gray-900 dark:text-white">
       <div className="flex flex-col gap-10 px-5 justify-center items-center w-full">
         <div className="p-10 h-2 font-bold text-3xl flex justify-between w-full">
           <p>Pantry</p>
@@ -116,11 +115,13 @@ export default function Home() {
               p: "20px 20px",
               display: "flex",
               alignItems: "center",
-              width: 300,
+              width: 400,
+              backgroundColor: "#333",
+              color: "#fff",
             }}
           >
             <InputBase
-              sx={{ ml: 1, flex: 1 }}
+              sx={{ ml: 1, flex: 1, color: "#fff" }}
               placeholder="Search Items"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -135,10 +136,13 @@ export default function Home() {
           className="md:w-[75vw] w-full justify-center items-center"
           display="flex"
           flexWrap="wrap"
-          gap={8}
+          gap={10}
         >
           {filteredInventory.map(({ name, quantity, image }) => (
-            <Card key={name} className="md:w-[300px]">
+            <Card
+              key={name}
+              className="md:w-[300px] dark:bg-gray-800 text-white shadow-xl rounded-lg"
+            >
               {image && (
                 <CardMedia
                   component="img"
@@ -151,20 +155,30 @@ export default function Home() {
                 <Typography gutterBottom variant="h5" component="div">
                   {name.charAt(0).toUpperCase() + name.slice(1)}
                 </Typography>
-                <Typography variant="body2" color="text.secondary">
+                <Typography variant="body2" color="text-white">
                   Quantity: {quantity}
                 </Typography>
               </CardContent>
               <CardActions>
-                <IconButton size="small" onClick={() => addItem(name, 1)}>
+                <IconButton
+                  size="small"
+                  onClick={() => addItem(name, 1)}
+                  className="text-green-500"
+                >
                   <AddIcon />
                 </IconButton>
-                <IconButton size="small" onClick={() => removeItem(name)}>
+                <IconButton
+                  size="small"
+                  onClick={() => removeItem(name)}
+                  className={`${
+                    quantity == 1 ? `text-red-500` : `text-blue-500`
+                  }`}
+                >
                   {quantity === 1 ? <DeleteIcon /> : <RemoveIcon />}
                 </IconButton>
                 {quantity > 1 && (
                   <IconButton
-                    className="float-end"
+                    className="float-end text-red-500"
                     size="small"
                     onClick={() => deleteItem(name)}
                   >
